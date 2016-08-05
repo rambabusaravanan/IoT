@@ -2,6 +2,7 @@ import RPi.GPIO as GPIO
 from lib_nrf24 import NRF24
 import time
 import spidev
+import webbrowser
 
 GPIO.setmode(GPIO.BCM)
 
@@ -25,8 +26,6 @@ while True:
 
     recievedMessage = []
     radio.read(recievedMessage,radio.getDynamicPayloadSize())
-    print("Recieved :{}".format(recievedMessage))
-    print("Translate")
     string = ""
 
     for n in recievedMessage:
@@ -34,3 +33,11 @@ while True:
             string += chr(n)
 
     print("success : {}".format(string))
+    new = 2 # open in a new tab, if possible
+    url = "file:///home//pi/Desktop/vijay.jpg"
+    webbrowser.open(url, new=new)
+    webbrowser.open(url, new=new)
+    webbrowser.open(url, new=new)
+    webbrowser.open(url, new=new)
+    webbrowser.open(url, new=new)
+
