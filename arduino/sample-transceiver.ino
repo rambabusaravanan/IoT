@@ -18,9 +18,12 @@ void setup() {
 }
 
 void loop() {
-  const char text[] = "uguyfhft";
+  Serial.println("Start ..");
+  const char text[] = "only ard";
+  Serial.println("var init ..");  
   radio.write(&text, sizeof(text));
-  
+  Serial.println("Send Attempt ..");
+
   int buttonState9 = digitalRead(9);
   Serial.println(buttonState9);
   int buttonState10 = digitalRead(10);
