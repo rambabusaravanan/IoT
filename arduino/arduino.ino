@@ -66,6 +66,7 @@ void setup() {
   radio.powerUp();
 }
 
+
 void loop() {
 
 	// Look for new cards
@@ -87,8 +88,15 @@ void loop() {
   Serial.println(buttonState3);
 
 	// Dump debug info about the card; PICC_HaltA() is automatically called
-	mfrc522.PICC_DumpToSerial(&(mfrc522.uid));
+//	mfrc522.PICC_DumpToSerial(&(mfrc522.uid));
 //  mfrc522.PCD_Init();  
+  Serial.println("UID");
+  byte readCard[mfrc522.uid.size];
+  for (int i = 0; i < mfrc522.uid.size; i++) {  // for size of uid.size write uid.uidByte to readCard
+    readCard[i] = mfrc522.uid.uidByte[i];
+    Serial.print(readCard[i], HEX);
+  }
+ //mfrc522.PCD_Init();  
   Serial.println("RFID Reading Complete ..");
 
 
@@ -98,6 +106,7 @@ void loop() {
   radio.write(&text, sizeof(text));
   Serial.println("Pi Data sent ....");
 
+  delay(2000);
 
   int buttonState10 = digitalRead(10);
   Serial.println("10 -> ");
