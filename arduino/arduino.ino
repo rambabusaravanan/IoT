@@ -40,6 +40,8 @@
 #include <nRF24L01.h>
 #include <RF24.h> 
 
+#define UID_SIZE        10        // actual size is `mfrc522.uid.size`
+
 // RFID Reader
 #define RST_PIN         3          // Configurable, see typical pin layout above
 #define SS_PIN          6         // Configurable, see typical pin layout above
@@ -47,6 +49,7 @@ MFRC522 mfrc522(SS_PIN, RST_PIN);  // Create MFRC522 instance
 
 // Transceiver
 RF24 radio(9, 10);
+byte readCard[UID_SIZE];
 
 void setup() {
 	Serial.begin(9600);		// Initialize serial communications with the PC
@@ -68,50 +71,52 @@ void setup() {
 
 
 void loop() {
-
 	// Look for new cards
 	if ( ! mfrc522.PICC_IsNewCardPresent()) {
 		return;
 	}
-
 	// Select one of the cards
 	if ( ! mfrc522.PICC_ReadCardSerial()) {
 		return;
 	}
-
-
-  int buttonState6 = digitalRead(6);
-  Serial.println("6 -> ");
-  Serial.println(buttonState6);
-  int buttonState3 = digitalRead(3);
-  Serial.println("3 -> ");
-  Serial.println(buttonState3);
-
+ 
 	// Dump debug info about the card; PICC_HaltA() is automatically called
 //	mfrc522.PICC_DumpToSerial(&(mfrc522.uid));
 //  mfrc522.PCD_Init();  
-  Serial.println("UID");
-  byte readCard[mfrc522.uid.size];
-  for (int i = 0; i < mfrc522.uid.size; i++) {  // for size of uid.size write uid.uidByte to readCard
-    readCard[i] = mfrc522.uid.uidByte[i];
-    Serial.print(readCard[i], HEX);
-  }
- //mfrc522.PCD_Init();  
-  Serial.println("RFID Reading Complete ..");
+//  byte readCard[mfrc522.uid.size];
 
+  // Check for new UID
+  boolean isNewCard = false;
+  for (int i = 0; i < mfrc522.uid.size; i++) {  // for size of uid.size write uid.uidByte to readCard (mfrc522.uid.size) vs UID_SIZE
+    if(readCard[i] != mfrc522.uid.uidByte[i]) {
+      isNewCard = true;
+    }
+    readCard[i] = mfrc522.uid.uidByte[i];
+  }
+
+  if(!isNewCard) {
+    return;
+  }
+  printUID(mfrc522);
 
  // SEND TO PI (Transceiver)
-  const char text[] = "RFID Detected ... Neruppu Daw..";
-  Serial.println("Pi Data initaialisasasd");
-  radio.write(&text, sizeof(text));
+//  const char text[] = "RFID Detected ... Neruppu Daw..";
+  radio.write(&readCard, sizeof(readCard));
   Serial.println("Pi Data sent ....");
-
-  delay(2000);
-
-  int buttonState10 = digitalRead(10);
-  Serial.println("10 -> ");
-  Serial.println(buttonState10);
-  int buttonState9 = digitalRead(9);
-  Serial.println("9 -> ");
-  Serial.println(buttonState9);
 }
+
+void printUID(MFRC522 mfrc522) {
+  Serial.print("\nUID HEX:");
+  for (int i = 0; i < mfrc522.uid.size; i++) {  // for size of uid.size write uid.uidByte to readCard (mfrc522.uid.size) vs UID_SIZE
+    Serial.print(mfrc522.uid.uidByte[i], HEX);
+    Serial.print(" ");
+  }
+  Serial.print("\nUID DEC:");
+  for (int i = 0; i < mfrc522.uid.size; i++) {  // for size of uid.size write uid.uidByte to readCard (mfrc522.uid.size) vs UID_SIZE
+    Serial.print(mfrc522.uid.uidByte[i]);
+    Serial.print(" ");
+  }
+  Serial.print("\n");
+
+}
+
